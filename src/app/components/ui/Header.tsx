@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { useLanguage } from "../../../context/LanguageContext";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform, useAnimation } from "framer-motion";
+import { FaGithub, FaLinkedin, FaInstagram, FaTelegramPlane, FaEnvelope, FaBriefcase } from "react-icons/fa";
 
 interface NavItem {
   id: string;
@@ -85,12 +85,107 @@ const pulseAnimation = {
   }
 };
 
+// Static translations
+const staticTranslations = {
+  nav: {
+    about: "About",
+    experience: "Experience",
+    projects: "Projects",
+    contacts: "Contact"
+  },
+  headerRole: "Full Stack Developer",
+  quickInfo: [
+    "Based in Ethiopia",
+    "Open to freelance work",
+    "Available for collaboration"
+  ],
+  getInTouch: "Get in Touch",
+  pressEsc: "Press ESC to close"
+};
+
+// Professional social media data with Instagram
+const professionalSocialMedia = [
+  {
+    id: "github",
+    icon: FaGithub,
+    label: "GitHub",
+    url: "https://github.com/surafelgk",
+    description: "View my code repositories",
+    color: "text-gray-700 hover:text-gray-900",
+    bgGradient: "from-gray-700 to-gray-900",
+    borderColor: "border-gray-300",
+    shortLabel: "GH",
+    order: 1
+  },
+  {
+    id: "linkedin",
+    icon: FaLinkedin,
+    label: "LinkedIn",
+    url: "https://linkedin.com/in/surafel-binalfew",
+    description: "Professional network profile",
+    color: "text-blue-700 hover:text-blue-800",
+    bgGradient: "from-blue-600 to-blue-800",
+    borderColor: "border-blue-300",
+    shortLabel: "IN",
+    order: 2
+  },
+  {
+    id: "instagram",
+    icon: FaInstagram,
+    label: "Instagram",
+    url: "https://instagram.com/surafel_b", // Add your Instagram URL
+    description: "Visual portfolio & updates",
+    color: "text-pink-600 hover:text-pink-700",
+    bgGradient: "from-pink-600 to-purple-700",
+    borderColor: "border-pink-300",
+    shortLabel: "IG",
+    order: 3
+  },
+  {
+    id: "portfolio",
+    icon: FaBriefcase,
+    label: "Portfolio",
+    url: "https://your-portfolio-link.com", // Replace with your portfolio link
+    description: "View my portfolio",
+    color: "text-purple-600 hover:text-purple-700",
+    bgGradient: "from-purple-600 to-purple-800",
+    borderColor: "border-purple-300",
+    shortLabel: "PF",
+    order: 4
+  },
+  {
+    id: "email",
+    icon: FaEnvelope,
+    label: "Email",
+    url: "mailto:surafelbinalfew@gmail.com",
+    description: "Send me an email",
+    color: "text-red-600 hover:text-red-700",
+    bgGradient: "from-red-600 to-red-800",
+    borderColor: "border-red-300",
+    shortLabel: "EM",
+    order: 5
+  },
+  {
+    id: "telegram",
+    icon: FaTelegramPlane,
+    label: "Telegram",
+    url: "https://t.me/Portfoliosura",
+    description: "Message me on Telegram",
+    color: "text-blue-500 hover:text-blue-600",
+    bgGradient: "from-blue-500 to-blue-700",
+    borderColor: "border-blue-300",
+    shortLabel: "TG",
+    order: 6
+  }
+].sort((a, b) => a.order - b.order);
+
 const Header = () => {
   const [activeSection, setActiveSection] = useState("about");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
+  const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
   
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -102,6 +197,7 @@ const Header = () => {
   const logoControls = useAnimation();
   const navControls = useAnimation();
   const headerControls = useAnimation();
+  const socialControls = useAnimation();
 
   const { scrollY } = useScroll();
   
@@ -127,28 +223,16 @@ const Header = () => {
     ]
   );
 
+  // Static nav items
   const navItems: NavItem[] = useMemo(
     () => [
-      { id: "about", label: "About", icon: "👤" },
-      { id: "experience", label: "Experience",  },
-      { id: "projects", label: "Projects",   },
-      { id: "contacts", label: "Contact",  },
+      { id: "about", label: staticTranslations.nav.about, icon: "👤" },
+      { id: "experience", label: staticTranslations.nav.experience },
+      { id: "projects", label: staticTranslations.nav.projects },
+      { id: "contacts", label: staticTranslations.nav.contacts },
     ],
     []
   );
-
-  // Use global language context
-  const { lang, setLang, t } = useLanguage();
-
-  // Derived nav items using current language
-  const localizedNavItems: NavItem[] = useMemo(() => (
-    [
-      { id: "about", label: t.nav.about, icon: "👤" },
-      { id: "experience", label: t.nav.experience },
-      { id: "projects", label: t.nav.projects },
-      { id: "contacts", label: t.nav.contacts },
-    ]
-  ), [t]);
 
   // Smooth scroll with animation
   const scrollToSection = useCallback(async (id: string) => {
@@ -198,7 +282,7 @@ const Header = () => {
     observerRef.current = new IntersectionObserver(updateActiveSection, options);
 
     // Observe all sections
-    localizedNavItems.forEach((item) => {
+    navItems.forEach((item) => {
       const section = document.getElementById(item.id);
       if (section) {
         observerRef.current?.observe(section);
@@ -210,7 +294,7 @@ const Header = () => {
         observerRef.current.disconnect();
       }
     };
-  }, [localizedNavItems, headerControls]);
+  }, [navItems, headerControls]);
 
   // Header always visible - only update scroll state for styling
   useEffect(() => {
@@ -267,33 +351,28 @@ const Header = () => {
         return;
       }
       
+      if (e.key === "Escape" && isImageOpen) {
+        setIsImageOpen(false);
+        return;
+      }
+      
       // Number keys for quick navigation (1-4) with animation
       if (!isMobileMenuOpen && e.altKey && e.key >= "1" && e.key <= "4") {
         const index = parseInt(e.key) - 1;
-        if (localizedNavItems[index]) {
+        if (navItems[index]) {
           // Animate all nav items
           await navControls.start({
             scale: [1, 0.95, 1],
             transition: { duration: 0.2 }
           });
-          scrollToSection(localizedNavItems[index].id);
+          scrollToSection(navItems[index].id);
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobileMenuOpen, localizedNavItems, scrollToSection, headerControls, navControls]);
-
-  // Close image modal on Escape
-  useEffect(() => {
-    if (!isImageOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsImageOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isImageOpen]);
+  }, [isMobileMenuOpen, isImageOpen, navItems, scrollToSection, headerControls, navControls]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -323,6 +402,16 @@ const Header = () => {
     setActiveSection("about");
     setIsMobileMenuOpen(false);
   }, [logoControls]);
+
+  const handleSocialHover = async (id: string | null) => {
+    setHoveredSocial(id);
+    if (id) {
+      await socialControls.start({
+        scale: [1, 1.05, 1],
+        transition: { duration: 0.3 }
+      });
+    }
+  };
 
   // Blue/Black theme background particle animation
   const ParticleBackground = () => (
@@ -427,7 +516,6 @@ const Header = () => {
                     className="rounded-full object-cover border-2 border-white shadow-lg relative z-10 cursor-pointer"
                     priority
                     onClick={(e) => {
-                      // prevent the logo button's click (scroll to top) when opening image
                       e.stopPropagation();
                       setIsImageOpen(true);
                     }}
@@ -459,7 +547,7 @@ const Header = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="hidden md:flex items-center space-x-1"
             >
-              {localizedNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <motion.div
                   key={item.id}
                   variants={fadeInUp}
@@ -545,14 +633,143 @@ const Header = () => {
               ))}
             </motion.nav>
 
-            {/* Language selector removed */}
+            {/* Professional Social Media Icons - Desktop */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="hidden lg:flex items-center space-x-2"
+            >
+              <div className="flex items-center space-x-3">
+                {/* Elegant separator */}
+                <motion.div
+                  className="w-8 h-[1px] bg-gradient-to-r from-blue-600/20 to-blue-800/10"
+                  animate={{
+                    width: ["0px", "32px", "32px"],
+                  }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                />
+                
+                {/* Professional social icons container */}
+                <div className="flex items-center space-x-2 bg-white/50 backdrop-blur-sm rounded-xl px-3 py-2 border border-gray-200 shadow-sm">
+                  {professionalSocialMedia.map((social, index) => (
+                    <motion.div
+                      key={social.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + (index * 0.1) }}
+                      className="relative"
+                    >
+                      <motion.a
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        animate={socialControls}
+                        whileHover={{ 
+                          scale: 1.1,
+                          y: -2,
+                          transition: { type: "spring", stiffness: 400, damping: 15 }
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        onMouseEnter={() => handleSocialHover(social.id)}
+                        onMouseLeave={() => handleSocialHover(null)}
+                        className="relative p-2 rounded-lg transition-all duration-300 group"
+                        aria-label={social.label}
+                      >
+                        {/* Minimalist background effect */}
+                        <motion.div
+                          className={`absolute inset-0 rounded-lg bg-gradient-to-r ${social.bgGradient} opacity-0 group-hover:opacity-10`}
+                          initial={false}
+                          animate={{
+                            opacity: hoveredSocial === social.id ? 0.1 : 0
+                          }}
+                          transition={{ duration: 0.3 }}
+                        />
+                        
+                        {/* Elegant tooltip */}
+                        <motion.div
+                          className="absolute -top-10 left-1/2 transform -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg shadow-lg opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none"
+                          initial={{ y: 5, opacity: 0 }}
+                          animate={{ 
+                            y: hoveredSocial === social.id ? 0 : 5,
+                            opacity: hoveredSocial === social.id ? 1 : 0
+                          }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="flex flex-col items-center">
+                            <span className="font-semibold">{social.label}</span>
+                            <span className="text-gray-300 text-[10px] mt-0.5">{social.description}</span>
+                          </div>
+                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
+                        </motion.div>
+                        
+                        {/* Social icon */}
+                        <div className="relative z-10">
+                          <social.icon 
+                            className={`w-5 h-5 transition-all duration-300 ${social.color} ${
+                              hoveredSocial === social.id ? 'scale-110' : ''
+                            }`}
+                          />
+                          
+                          {/* Subtle indicator dot */}
+                          <motion.div
+                            className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"
+                            initial={{ scale: 0 }}
+                            animate={{ 
+                              scale: hoveredSocial === social.id ? 1 : 0,
+                              opacity: hoveredSocial === social.id ? 1 : 0
+                            }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        </div>
+                      </motion.a>
+                      
+                      {/* Vertical separator between icons */}
+                      {index < professionalSocialMedia.length - 1 && (
+                        <motion.div
+                          className="absolute -right-1 top-1/2 -translate-y-1/2 h-3 w-[1px] bg-gray-300"
+                          animate={{
+                            height: hoveredSocial === social.id || hoveredSocial === professionalSocialMedia[index + 1]?.id ? 
+                              ["6px", "12px", "6px"] : "6px"
+                          }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        />
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
 
             {/* Mobile Menu Button with Blue Theme */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
+              transition={{ delay: 0.6, type: "spring" }}
+              className="md:hidden flex items-center space-x-2"
             >
+              {/* Mobile Social Media Icons (professional) */}
+              <div className="flex items-center space-x-1 mr-2 bg-white/50 backdrop-blur-sm rounded-lg px-2 py-1.5 border border-gray-200">
+                {professionalSocialMedia.slice(0, 3).map((social) => (
+                  <motion.a
+                    key={social.id}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileTap={{ scale: 0.9 }}
+                    className="p-1.5 rounded-md hover:bg-gray-100 transition-colors relative group"
+                    aria-label={social.label}
+                  >
+                    <social.icon className={`w-4 h-4 ${social.color}`} />
+                    {/* Mobile tooltip */}
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">
+                      {social.shortLabel}
+                      <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+              
               <motion.button
                 animate={isMobileMenuOpen ? "open" : "closed"}
                 variants={{
@@ -562,7 +779,7 @@ const Header = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 relative"
+                className="p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 relative"
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -689,6 +906,7 @@ const Header = () => {
                         width={56}
                         height={56}
                         className="rounded-full object-cover border-2 border-white shadow-lg relative z-10"
+                        onClick={() => setIsImageOpen(true)}
                       />
                     </motion.div>
                     <div>
@@ -696,7 +914,7 @@ const Header = () => {
                         initial={{ x: -10, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="sr-only"
+                        className="font-semibold text-gray-900"
                       >
                         Surafel Binalfew
                       </motion.h2>
@@ -706,21 +924,21 @@ const Header = () => {
                         transition={{ delay: 0.3 }}
                         className="text-sm text-gray-600"
                       >
-                        {t.headerRole}
+                        {staticTranslations.headerRole}
                       </motion.p>
                     </div>
                   </div>
-                    <div className="flex items-center gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.1, rotate: 90 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                        aria-label="Close menu"
-                      >
-                        <span className="text-2xl text-gray-500 hover:text-gray-700">×</span>
-                      </motion.button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                      aria-label="Close menu"
+                    >
+                      <span className="text-2xl text-gray-500 hover:text-gray-700">×</span>
+                    </motion.button>
+                  </div>
                 </div>
               </motion.div>
 
@@ -732,7 +950,7 @@ const Header = () => {
                   animate="visible"
                   className="space-y-2"
                 >
-                  {localizedNavItems.map((item, index) => (
+                  {navItems.map((item, index) => (
                     <motion.div
                       key={item.id}
                       variants={fadeInUp}
@@ -797,12 +1015,58 @@ const Header = () => {
                   ))}
                 </motion.nav>
 
-                {/* Quick Info with blue accents */}
+                {/* Professional Social Media Section in Mobile Menu */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="mt-12 p-6 bg-gradient-to-br from-white to-blue-50 rounded-3xl border border-blue-100 shadow-lg"
+                  className="mt-8 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm"
+                >
+                  <motion.h3
+                    whileHover={{ x: 5 }}
+                    className="font-semibold text-gray-900 mb-4 flex items-center gap-3"
+                  >
+                    <motion.span
+                      animate={{ rotate: [0, 10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-2xl text-blue-600"
+                    >
+                      📱
+                    </motion.span>
+                    Professional Profiles
+                  </motion.h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {professionalSocialMedia.map((social) => (
+                      <motion.a
+                        key={social.id}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`flex items-center space-x-3 p-3 rounded-xl border ${social.borderColor} hover:shadow-md transition-all duration-300 group`}
+                        aria-label={social.label}
+                      >
+                        <div className={`p-2 rounded-lg bg-gradient-to-r ${social.bgGradient}/10 group-hover:${social.bgGradient}/20 transition-all duration-300`}>
+                          <social.icon 
+                            className={`w-5 h-5 ${social.color}`}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium text-gray-900">{social.label}</span>
+                          <p className="text-xs text-gray-500 mt-0.5">{social.description}</p>
+                        </div>
+                      </motion.a>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Quick Info with blue accents */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-6 p-6 bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-100 shadow-sm"
                 >
                   <motion.h3
                     whileHover={{ x: 5 }}
@@ -823,7 +1087,7 @@ const Header = () => {
                     animate="visible"
                     className="space-y-4"
                   >
-                    {t.quickInfo.map((text, index) => (
+                    {staticTranslations.quickInfo.map((text, index) => (
                       <motion.p
                         key={index}
                         variants={fadeInUp}
@@ -852,7 +1116,7 @@ const Header = () => {
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.6 }}
                 className="p-6 border-t border-gray-200 bg-white/80 backdrop-blur-sm relative z-10"
               >
                 <motion.button
@@ -880,7 +1144,7 @@ const Header = () => {
                     >
                       👋
                     </motion.span>
-                    <span>{t.getInTouch}</span>
+                    <span>{staticTranslations.getInTouch}</span>
                     <motion.span
                       animate={{ x: [0, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
@@ -893,10 +1157,10 @@ const Header = () => {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
+                  transition={{ delay: 0.7 }}
                   className="text-center text-xs text-gray-500 mt-4"
                 >
-                  {t.pressEsc.split('ESC').map((part, i, arr) => (
+                  {staticTranslations.pressEsc.split('ESC').map((part, i, arr) => (
                     <span key={i}>
                       {i === 0 ? part : null}
                       {i > 0 && (
@@ -911,51 +1175,57 @@ const Header = () => {
           </>
         )}
       </AnimatePresence>
-        {/* Image lightbox/modal */}
-        <AnimatePresence>
-          {isImageOpen && (
+      
+      {/* Small Image Modal with Neon Frame */}
+      <AnimatePresence>
+        {isImageOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-60 flex items-center justify-center bg-black/30"
+            onClick={() => setIsImageOpen(false)}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-60 flex items-center justify-center bg-black/30"
-              onClick={() => setIsImageOpen(false)}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative mx-4 max-w-xs sm:max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
             >
+              {/* Neon frame - made smaller */}
               <motion.div
-                initial={{ scale: 0.98 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.98 }}
-                transition={{ type: "spring", damping: 22, stiffness: 260 }}
-                className="relative max-w-[420px] w-full bg-white rounded-lg shadow-md p-3"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Neon frame */}
-                <motion.div
-                  className="absolute -inset-1 rounded-lg blur-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 opacity-60 z-0"
-                  animate={{ opacity: [0.35, 0.65, 0.35], rotate: [0, 2, 0] }}
-                  transition={{ duration: 2.2, repeat: Infinity }}
+                className="absolute -inset-0.5 rounded-lg blur-md bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 opacity-70 z-0"
+                animate={{ 
+                  opacity: [0.5, 0.8, 0.5],
+                  rotate: [0, 1, 0]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+              
+              <div className="relative z-10 bg-white p-1.5 rounded-lg">
+                <Image
+                  src="/segni-pic2.jpg"
+                  alt="Surafel Binalfew"
+                  width={400}
+                  height={400}
+                  className="w-full h-auto rounded-md object-cover"
                 />
-                <div className="relative z-10">
-                  <Image
-                    src="/segni-pic2.jpg"
-                    alt="Surafel Binalfew"
-                    width={800}
-                    height={800}
-                    className="w-full h-auto rounded-md object-cover"
-                  />
-                  <button
-                    onClick={() => setIsImageOpen(false)}
-                    aria-label="Close image"
-                    className="absolute top-2 right-2 p-1 rounded-full bg-white text-gray-700 border"
-                  >
-                    ×
-                  </button>
-                </div>
-              </motion.div>
+                
+                <button
+                  onClick={() => setIsImageOpen(false)}
+                  aria-label="Close image"
+                  className="absolute -top-3 -right-3 p-1.5 rounded-full bg-white text-gray-700 border border-gray-300 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  ×
+                </button>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

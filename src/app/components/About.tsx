@@ -49,8 +49,8 @@ export default function About() {
 
       {/* Education */}
       <p className="text-sm mt-2 text-muted"> 
-       - B.S. Computer Science student <b>at Unity University </b> with a strong self-taught background in <b>Dgital Marketing</b> and{" "}
-        <b>video editor/ Designer</b> 
+       - B.S. Computer Science graduate from <b> Unity University </b> with a strong self taught background in <b>Dgital Marketing Specialist</b> and{" "}
+        <b>video editor/ Graphics Designer</b> 
       </p>
 
       {/* Involvement */}
