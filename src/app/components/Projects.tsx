@@ -369,7 +369,7 @@ export default function Projects() {
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Videos are muted and may autoplay when scrolling. Click any video to control playback.
+            
           </p>
         </div>
       </div>
