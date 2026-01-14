@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FaGlobe, FaGithub, FaYoutube, FaTelegramPlane } from "react-icons/fa";
-import Image from "next/image";
 
 interface Project {
   title: string;
@@ -18,7 +17,6 @@ interface Project {
   demo?: string;
 }
 
-// Static translations since language context is removed
 const staticTranslations = {
   headings: {
     projects: "Projects"
@@ -64,120 +62,210 @@ const projects: Project[] = [
 
 export default function Projects() {
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+  const projectRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [isPlaying, setIsPlaying] = useState<boolean[]>(projects.map(() => false));
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
 
-  // Play a specific video when user clicks the overlay play button
-  const handlePlay = (index: number) => {
-    const v = videoRefs.current[index];
-    if (!v) return;
-    
-    // Ensure playsinline for mobile and mute the video
-    v.setAttribute("playsinline", "");
-    v.setAttribute("webkit-playsinline", "");
-    v.muted = true; // Mute the video
-    
-    const p = v.play();
-    if (p && typeof p.then === "function") {
-      p.then(() => {
-        setIsPlaying((prev) => {
-          const copy = [...prev];
-          copy[index] = true;
-          return copy;
+  // Track user interaction
+  useEffect(() => {
+    const handleInteraction = () => {
+      if (!hasUserInteracted) {
+        setHasUserInteracted(true);
+        console.log("User interaction detected - autoplay enabled");
+      }
+    };
+
+    // Listen for any interaction
+    document.addEventListener('click', handleInteraction, { once: true });
+    document.addEventListener('touchstart', handleInteraction, { once: true });
+    document.addEventListener('scroll', handleInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('scroll', handleInteraction);
+    };
+  }, [hasUserInteracted]);
+
+  // Setup intersection observer for scroll-based autoplay
+  useEffect(() => {
+    if (!hasUserInteracted) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = parseInt(entry.target.getAttribute('data-index') || '0');
+          
+          if (entry.isIntersecting) {
+            // 70% chance to play when video enters viewport
+            if (Math.random() < 0.7 && !isPlaying[index]) {
+              playVideo(index);
+            }
+          } else {
+            // Pause when leaving viewport
+            if (isPlaying[index]) {
+              pauseVideo(index);
+            }
+          }
         });
-      }).catch(() => {
-        // Still mark as playing to show controls even if autoplay failed
-        setIsPlaying((prev) => {
-          const copy = [...prev];
-          copy[index] = true;
-          return copy;
+      },
+      {
+        threshold: 0.4, // When 40% is visible
+        rootMargin: '0px 0px -30px 0px'
+      }
+    );
+
+    // Observe each project
+    projectRefs.current.forEach((ref, index) => {
+      if (ref) {
+        ref.setAttribute('data-index', index.toString());
+        observer.observe(ref);
+      }
+    });
+
+    return () => {
+      projectRefs.current.forEach(ref => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [hasUserInteracted, isPlaying]);
+
+  // Play video function
+  const playVideo = async (index: number) => {
+    const video = videoRefs.current[index];
+    if (!video) return;
+
+    // Pause currently playing video
+    if (currentlyPlaying !== null && currentlyPlaying !== index) {
+      const currentVideo = videoRefs.current[currentlyPlaying];
+      if (currentVideo) {
+        currentVideo.pause();
+        setIsPlaying(prev => {
+          const newState = [...prev];
+          newState[currentlyPlaying] = false;
+          return newState;
         });
+      }
+    }
+
+    // Set video properties
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+
+    try {
+      await video.play();
+      setIsPlaying(prev => {
+        const newState = [...prev];
+        newState[index] = true;
+        return newState;
       });
-    } else {
-      setIsPlaying((prev) => {
-        const copy = [...prev];
-        copy[index] = true;
-        return copy;
-      });
+      setCurrentlyPlaying(index);
+    } catch (error) {
+      console.log(`Failed to autoplay video ${index}:`, error);
     }
   };
 
-  // Pause a specific video
-  const handlePause = (index: number) => {
-    const v = videoRefs.current[index];
-    if (!v) return;
-    v.pause();
-    setIsPlaying((prev) => {
-      const copy = [...prev];
-      copy[index] = false;
-      return copy;
+  // Pause video function
+  const pauseVideo = (index: number) => {
+    const video = videoRefs.current[index];
+    if (!video) return;
+    
+    video.pause();
+    setIsPlaying(prev => {
+      const newState = [...prev];
+      newState[index] = false;
+      return newState;
     });
+    
+    if (currentlyPlaying === index) {
+      setCurrentlyPlaying(null);
+    }
+  };
+
+  // Handle video click - toggle play/pause
+  const handleVideoClick = (index: number) => {
+    if (!hasUserInteracted) {
+      setHasUserInteracted(true);
+    }
+
+    if (isPlaying[index]) {
+      pauseVideo(index);
+    } else {
+      playVideo(index);
+    }
   };
 
   return (
     <section id="projects">
       <h2 className="text-xl font-bold mb-6">{staticTranslations.headings.projects}</h2>
+      
+      {/* Status Indicator */}
+      <div className="mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full border border-gray-300">
+          <div className={`w-2 h-2 rounded-full ${hasUserInteracted ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          <span className="text-sm text-gray-700">
+            {hasUserInteracted ? 'Scroll to autoplay • Click video to control' : 'Interact with page to enable videos'}
+          </span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {projects.map((project, index) => (
           <div
             key={index}
-            className="rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition duration-300 bg-white overflow-hidden"
+            ref={(el) => { projectRefs.current[index] = el }}
+            data-index={index}
+            className="rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white overflow-hidden group"
           >
             {/* Video Section */}
             {project.video && (
-              <div className="relative">
+              <div className="relative overflow-hidden">
                 <video
                   ref={(el) => { videoRefs.current[index] = el }}
                   src={project.video}
-                  className="rounded-t-xl w-full h-48 sm:h-56 object-cover"
+                  className="rounded-t-xl w-full h-48 sm:h-56 object-cover cursor-pointer"
+                  onClick={() => handleVideoClick(index)}
+                  muted
                   playsInline
                   loop
-                  muted // Muted by default
                   preload="metadata"
                   poster={project.image}
                   style={{ backgroundColor: "#000" }}
-                  controls={isPlaying[index]}
-                  onClick={() => isPlaying[index] ? handlePause(index) : handlePlay(index)}
                 />
 
-                {/* Custom Play/Pause Overlay */}
-                {!isPlaying[index] ? (
-                  <button
-                    onClick={() => handlePlay(index)}
-                    aria-label={`Play ${project.title} (muted)`}
-                    className="absolute inset-0 flex items-center justify-center rounded-t-xl bg-black/40 hover:bg-black/50 transition-all duration-200"
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-14 h-14 bg-white/95 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M8 5v14l11-7L8 5z" fill="#000" />
-                        </svg>
-                      </div>
-                      <span className="text-xs text-white bg-black/50 px-2 py-1 rounded-full">
-                        Muted • Click to play
-                      </span>
-                    </div>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handlePause(index)}
-                    aria-label={`Pause ${project.title}`}
-                    className="absolute inset-0 flex items-center justify-center rounded-t-xl bg-black/20 hover:bg-black/30 transition-all duration-200 opacity-0 hover:opacity-100"
-                  >
-                    <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" fill="#000" />
+                {/* Overlay with status indicators */}
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                  {/* Left side: Status indicators */}
+                  <div className="flex items-center gap-2">
+                    <div className="bg-black/80 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1.5">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                       </svg>
+                      <span>Muted</span>
                     </div>
-                  </button>
-                )}
+                    
+                    {isPlaying[index] && (
+                      <div className="bg-green-600/90 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1.5 animate-pulse">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Live</span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Muted Indicator */}
-                {isPlaying[index] && (
-                  <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                    </svg>
-                    <span>Muted</span>
+                  {/* Right side: Control hint */}
+                  <div className="bg-black/50 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    Click to {isPlaying[index] ? 'pause' : 'play'}
+                  </div>
+                </div>
+
+                {/* Top-right indicator */}
+                {hasUserInteracted && !isPlaying[index] && (
+                  <div className="absolute top-3 right-3 bg-purple-600/90 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm">
+                    May autoplay
                   </div>
                 )}
               </div>
@@ -185,32 +273,29 @@ export default function Projects() {
 
             {/* Project Details */}
             <div className="p-4">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="text-lg font-semibold">{project.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">{project.dates}</p>
                 </div>
                 {isPlaying[index] && (
-                  <button
-                    onClick={() => handlePause(index)}
-                    className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded-full border border-gray-300 hover:border-gray-400 transition-colors"
-                    aria-label="Stop video"
-                  >
-                    Stop Video
-                  </button>
+                  <div className="flex items-center gap-1.5 text-green-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs font-medium">Playing</span>
+                  </div>
                 )}
               </div>
 
-              <p className="mt-3 text-sm text-gray-700 whitespace-pre-line">
+              <p className="mt-3 text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                 {project.description}
               </p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 {project.tags.map((tag, i) => (
                   <span
                     key={i}
-                    className="bg-gray-100 text-xs text-gray-800 px-2.5 py-1 rounded-full border border-gray-200"
+                    className="bg-gray-100 text-xs text-gray-800 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-200 transition-colors"
                   >
                     {tag}
                   </span>
@@ -224,7 +309,7 @@ export default function Projects() {
                     href={project.demo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
                   >
                     <FaYoutube className="text-sm" /> Demo
                   </a>
@@ -234,7 +319,7 @@ export default function Projects() {
                     href={project.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
                   >
                     <FaGlobe className="text-sm" /> Website
                   </a>
@@ -244,14 +329,14 @@ export default function Projects() {
                     href={project.source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
                   >
                     {project.source.includes("t.me") ? (
                       <FaTelegramPlane className="text-sm" />
                     ) : (
                       <FaGithub className="text-sm" />
-                    )}{" "}
-                    {project.source.includes("t.me") ? "Telegram" : "Source"}
+                    )}
+                    {project.source.includes("t.me") ? " Telegram" : " Source"}
                   </a>
                 )}
                 {project.frontend_source && (
@@ -259,7 +344,7 @@ export default function Projects() {
                     href={project.frontend_source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
                   >
                     <FaGithub className="text-sm" /> Front-End
                   </a>
@@ -269,7 +354,7 @@ export default function Projects() {
                     href={project.backend_source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
                   >
                     <FaGithub className="text-sm" /> Back-End
                   </a>
@@ -278,6 +363,15 @@ export default function Projects() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Footer Note */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="text-center">
+          <p className="text-xs text-gray-500">
+            Videos are muted and may autoplay when scrolling. Click any video to control playback.
+          </p>
+        </div>
       </div>
     </section>
   );
