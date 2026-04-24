@@ -34,9 +34,9 @@ const projects: Project[] = [
     source: "https://github.com/surafelgk"
   },
   {
-    title: "Netflix Clone",
+    title: "Cafe and Restaurant menu",
     dates: "Nov 2025",
-    description: `Netflix Clone – First Project. This is my first web development project, where I built a Netflix-style interface to learn the basics of HTML, CSS, and JavaScript. The project helped me understand website layout, styling, and responsive design.`,
+    description: `A cafe or restaurant menu QR code is a digital solution that allows customers to scan a code using their smartphone camera, immediately opening a digital, contactless menu, often featuring images, descriptions, and easy updates`,
     tags: ["Next.js", "React", "CSS", "Javascript"],
     video: "/13.mp4",
     website: "",
@@ -225,7 +225,11 @@ export default function Projects() {
                 <video
                   ref={(el) => { videoRefs.current[index] = el }}
                   src={project.video}
-                  className="rounded-t-xl w-full h-48 sm:h-56 object-cover cursor-pointer"
+                  className={`rounded-t-xl w-full cursor-pointer ${
+                    project.title === "Cafe and Restaurant menu" 
+                      ? "h-80 sm:h-96 object-contain" 
+                      : "h-48 sm:h-56 object-cover"
+                  }`}
                   onClick={() => handleVideoClick(index)}
                   muted
                   playsInline
