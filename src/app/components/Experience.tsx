@@ -13,7 +13,7 @@ export default function Experience() {
     {
       role: "Video Editor & Brand Designer",
       company: "Zureaddis Digital Marketing",
-      image: "/zureaddis-logo.png", // You'll need to add this image
+      image: "/zureaddis-logo.png",
       duration: "july 2025 – Present",
       summary:
         "Providing comprehensive creative services including video editing, brand design, and digital content creation for diverse clients.",
@@ -44,7 +44,7 @@ export default function Experience() {
       image: "/zureaddis-logo.png",
       duration: "july 2025 – Aug 2025",
       summary:
-        "web developer zuraddiss Digital marketing agency" ,
+        "web developer zuraddiss Digital marketing agency",
       bullets: [
         "Developed responsive web sites using modern frameworks and technologies.",
         "Optimized website performance and ensured cross-browser compatibility.",
@@ -59,7 +59,6 @@ export default function Experience() {
       ],
       projects: [
         { name: "https://zureaddis.com/", url: "https://zureaddis.com/" },
-        // { name: "Autonomous Rancher® App", url: "https://www.701x.com/software?srsltid=AfmBOorxebtqZy67EYnFv_bECcymNHjTMMH1UyxjZ0b1tcCN8EQRkcfL" }
       ]
     },
     {
@@ -68,88 +67,77 @@ export default function Experience() {
       image: "/men.png",
       duration: "sep 2025 – present",
       summary:
-        "Fast, reliable editing for your projects. Expert in cuts, color, motion graphics. Let’s bring your vision to life.",
+        "Fast, reliable editing for your projects. Expert in cuts, color, motion graphics. Let's bring your vision to life.",
       bullets: [
         "Fast, efficient editing to meet tight deadlines.",
-"Specializes in social media clips, ads, and YouTube content.",
-"Clean, modern cuts that keep viewers engaged.",
+        "Specializes in social media clips, ads, and YouTube content.",
+        "Clean, modern cuts that keep viewers engaged.",
       ],
-       tech: [
-         "Davinci Resolve", "Adobe premium pro", "Adobe Photoshop", "Adobe After effect", 
+      tech: [
+        "Davinci Resolve", 
+        "Adobe premium pro", 
+        "Adobe Photoshop", 
+        "Adobe After effect", 
       ],
       projects: [
         { name: "Portfolio", url: "https://t.me/Portfoliosura" }
       ]
-    // },
-    // {
-    //   role: "Automation Systems Programmer Intern",
-    //   company: "Marvin Windows",
-    //   image: "/marvin-automation.png",
-    //   duration: "May 2024 – Dec 2024",
-    //   summary:
-    //     "Engineered control system tools and data pipelines to optimize production flow and reduce material waste.",
-    //   bullets: [
-    //     "Developed 5 GUI interfaces with Ignition and Python, enhancing system control and reducing errors by 15%.",
-    //     "Optimized MS SQL Server queries using stored procedures, improving work efficiency by 30%.",
-    //     "Designed and implemented a recut feature that verifies if parts are cut correctly and redirects them for proper cutting, saving over $100,000 annually in material waste."
-    //   ],
-    //   tech: ["Ignition", "Python", "MS SQL Server"],
-    //   projects: [
-    //     { name: "Recut System"},
-    //     { name: "GUI Control Interfaces"}
-    //   ]
-    // },
-    // {
-    //   role: "Software Engineer Intern",
-    //   company: "Marvin Windows",
-    //   image: "/marvin-swe.png",
-    //   duration: "May 2023 – April 2024",
-    //   summary:
-    //     "Built full-stack production tools that streamlined operations and improved daily reporting efficiency.",
-    //   bullets: [
-    //     "Created an end-of-shift reporting tool that reduced report generation time by 40% and improved data accuracy, providing supervisors with daily summaries via email.",
-    //     "Collaborated with Design and Product teams to develop a machine metrics tool using APIs, C#, SQL, Azure, and React to track and display machine status on production line TV boards, improving operational efficiency by 45%."
-    //   ],
-    //   tech: ["React", "JavaScript", "C#", "SQL", "Git", "Azure"],
-    //   projects: [
-    //     { name: "Shift Report Tool"},
-    //     { name: "Machine Metrics Tool"}
-    //   ]
-    // },
-    // {
-    //   role: "Computer Science Tutor",
-    //   company: "Concordia College",
-    //   image: "/concordia-college-pic.png",
-    //   duration: "Jan 2025 – Current",
-    //   summary:
-    //     "Tutoring foundational and intermediate computer science courses, supporting students with programming and algorithm concepts.",
-    //   bullets: [
-    //     "Provided academic support for CS100 (Intro to Computer Science) and CS200 (Fundamental Structures and Algorithms).",
-    //     "Assisted students in understanding programming logic, data structures, recursion, and algorithmic thinking.",
-    //     "Held one-on-one and group tutoring sessions to reinforce lecture content and support coursework success."
-    //   ],
-    //   tech: ["Python", "Java", "Algorithms", "Data Structures"],
-    //   projects: []
-    // },
-    // {
-    //   role: "Project Manager",
-    //   company: "Computer Science Society",
-    //   image: "/cssociety-logo.png",
-    //   duration: "Aug 2024 – Mar 2025",
-    //   summary:
-    //     "Led web development and community engagement efforts for Concordia's Computer Science Society.",
-    //   bullets: [
-    //     "Led the development and launch of the club’s website, implementing a CI/CD pipeline for seamless deployment.",
-    //     "Organized tri-college hackathons that engaged 15–20 students from neighboring institutions.",
-    //     "Mentored fellow students on resume building, job applications, and strategies for entering the tech industry."
-    //   ],
-      // tech: ["CI/CD", "Web Development", "Leadership", "Mentorship"],
-      // projects: [
-      //   {
-      //     name: "CSS Website",
-      //     url: "https://css-website-staging.vercel.app/"
-      //   }
-      // ]
+    },
+    {
+      role: "Social Media Manager & Video Editor",
+      company: "Lavoca Company",
+      image: "/lavoca.jpg", // You'll need to add this image
+      duration: "Present",
+      summary:
+        "Managing social media presence and creating engaging video content for Lavoca Company's brand identity and marketing campaigns.",
+      bullets: [
+        "Create and edit engaging video content for social media platforms including Instagram, TikTok, and LinkedIn.",
+        "Develop and execute social media strategies to increase brand awareness and engagement.",
+        "Film and photograph company events, products, and behind-the-scenes content as a videographer.",
+        "Manage content calendars and schedule posts across multiple platforms.",
+        "Analyze social media metrics and adjust strategies to optimize performance.",
+        "Collaborate with marketing team to ensure brand consistency across all visual content."
+      ],
+      tech: [
+        "Adobe Premiere Pro",
+        "DaVinci Resolve",
+        "Adobe Photoshop",
+        "Social Media Management",
+        "Videography",
+        "Content Strategy",
+        "Analytics Tools"
+      ],
+      projects: [
+        { name: "Lavoca Social Portfolio", url: "https://www.instagram.com/lavoca/" }
+      ]
+    },
+    {
+      role: "Video Editor & Videographer",
+      company: "Letarik Interior",
+      image: "/logo 3.png",
+      duration: "Present",
+      summary:
+        "Professional videography and video editing services for letarik interior promotional and corporate content needs.",
+      bullets: [
+        "Shoot and edit high-quality promotional videos for products and services.",
+        "Operate professional camera equipment, lighting, and audio gear during on-location and studio shoots.",
+        "Produce customer testimonial videos, product demonstrations, and corporate interviews.",
+        "Apply color grading, sound design, and motion graphics to enhance video quality.",
+        "Manage video assets and maintain organized project files for easy access and reuse.",
+        "Collaborate with creative directors to storyboard and plan video productions."
+      ],
+      tech: [
+        "DaVinci Resolve",
+        "Adobe Premiere Pro",
+        "Adobe After Effects",
+        "Sony Cameras",
+        "Lighting Equipment",
+        "Audio Recording",
+        "Motion Graphics"
+      ],
+      projects: [
+        { name: "Letarik interior Video Portfolio", url: "https://www.lavoca.com/videos" }
+      ]
     }
   ];
   
@@ -157,9 +145,9 @@ export default function Experience() {
     setOpenSet((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(i)) {
-        newSet.delete(i); // close
+        newSet.delete(i);
       } else {
-        newSet.add(i); // open
+        newSet.add(i);
       }
       return newSet;
     });
